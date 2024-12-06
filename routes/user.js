@@ -1,35 +1,37 @@
 const express = require('express');
 const authenticateUser = require('../middlewares/authMiddleware');
+const bcrypt=require('bcrypt');
 const router = express.Router();
+const jwt=require('jsonwebtoken');
 
-// const client=require('../config/db');
+const client=require('../config/db');
 
 // Auth routes
 router.post('/register', async(req,res)=>{
-    const { username, password, role } = req.body;
+    const { username, password,email } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const query = `
-      INSERT INTO users (username, password, role) 
-      VALUES ($1, $2, $3) 
-      RETURNING id, username, role
+      INSERT INTO users (username, password,email) 
+      VALUES ($1, $2,$3) 
+      RETURNING id, username
     `;
-    const values = [username, hashedPassword, role];
+    const values = [username, hashedPassword, email];
     const result = await client.query(query, values);
     res.status(201).json({ message: 'User registered successfully', user: result.rows[0] });
   } catch (err) {
-    res.status(500).json({ error: 'Registration failed' });
+    res.status(500).json({ error: 'Registration failed'+err });
   }
 });
 
 
 router.post('/login', async(req,res)=>{
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
     try {
-      const query = `SELECT * FROM users WHERE username = $1`;
-      const result = await client.query(query, [username]);
+      const query = `SELECT * FROM users WHERE email = $1`;
+      const result = await client.query(query, [email]);
   
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'User not found' });
@@ -50,13 +52,13 @@ router.post('/login', async(req,res)=>{
   
       res.status(200).json({ message: 'Login successful', token });
     } catch (err) {
-      res.status(500).json({ error: 'Login failed' });
+      res.status(500).json({ error: 'Login failed '+err });
     }
 });
 
 // User operations
 router.get('/trains', authenticateUser, async (req, res) => {
-      const { source, destination } = req.query;  // Assuming these parameters are passed as query parameters
+      const { source, destination } = req.body;  // Assuming these parameters are passed as query parameters
     
       try {
         const query = `

@@ -1,8 +1,6 @@
 const express=require('express');
-const client=require('./config/db');
-
-require('./dbsetup');
 require('dotenv').config();
+// require('./dbsetup');
 
 const PORT=process.env.PORT || 3000
 const adminRoutes = require('./routes/admin');

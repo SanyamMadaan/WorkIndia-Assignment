@@ -1,4 +1,5 @@
 const client=require('./config/db');
+
 const createTables = async () => {
   try {
     // Creating Users Table
@@ -13,8 +14,7 @@ const createTables = async () => {
     await client.query(createUsersTableQuery);
     console.log('Users table created or already exists.');
 
-    // You can similarly add queries for 'train' and 'booking' tables if needed
-    // For example:
+
     const createTrainsTableQuery = `
       CREATE TABLE IF NOT EXISTS trains (
         id SERIAL PRIMARY KEY,
@@ -28,11 +28,10 @@ const createTables = async () => {
     await client.query(createTrainsTableQuery);
     console.log('Trains table created or already exists.');
 
-    // Repeat for other tables like bookings
   } catch (err) {
     console.error('Error setting up the database:', err);
   } finally {
-    await client.end();  // Close the database connection
+    await client.end();  // Closing the database connection
   }
 };
 
